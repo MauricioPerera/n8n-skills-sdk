@@ -1,0 +1,24 @@
+{
+  "model": "ibm/granite-3.2-8b",
+  "stack": "skill+sdk+rest",
+  "rows": [
+    {
+      "task": "schedule-slack",
+      "tool_calls": 3,
+      "errors": 0,
+      "turns": 3,
+      "validate_attempts": 1,
+      "created_ids": [
+        "yYr8JsUqvimmOhBf"
+      ],
+      "success": true,
+      "seq": [
+        "reference",
+        "validate",
+        "create"
+      ],
+      "fatal": null,
+      "wall_s": 159.2
+    }
+  ]
+}

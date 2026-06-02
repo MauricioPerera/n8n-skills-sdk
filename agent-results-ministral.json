@@ -1,0 +1,23 @@
+{
+  "model": "mistralai/ministral-3-3b",
+  "stack": "skill+sdk+rest",
+  "rows": [
+    {
+      "task": "schedule-slack",
+      "tool_calls": 4,
+      "errors": 0,
+      "turns": 4,
+      "validate_attempts": 0,
+      "created_ids": [],
+      "success": false,
+      "seq": [
+        "reference",
+        "reference",
+        "reference",
+        "reference"
+      ],
+      "fatal": null,
+      "wall_s": 104.6
+    }
+  ]
+}

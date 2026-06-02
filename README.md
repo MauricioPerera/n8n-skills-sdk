@@ -70,6 +70,22 @@ Run it: `N8N_API_KEY=... python agent_harness.py --model-id qwen/qwen3.5-9b`
 (raw rows in `agent-results.json`). MCP numbers are N=1 from the POC; this is N=3,
 single model — a proof, not a benchmark.
 
+### Across models
+
+| model | size | result on `schedule-slack` |
+|---|---|---|
+| `qwen/qwen3.5-9b` | 9B | ✅ 3 calls (`reference → validate → create`); 3/3 tasks overall |
+| `ibm/granite-3.2-8b` | 8B | ✅ 3 calls — confirms it's not qwen-specific |
+| `mistralai/ministral-3-3b` | 3B | ✗ looped on `reference`, never wrote code |
+
+Two capable ~8–9B models complete it cleanly in ~3 calls. A 3B model hits a
+**capability floor** — it can follow the tool protocol but can't *write* the SDK
+code. That floor is about the model, not the stack: the MCP path needs the same
+code-writing ability, and on a small-context model the MCP's 25 tools don't even
+fit (RFC POC, Finding 0). The skill+SDK+REST stack at least *runs* on small
+context (3 tool defs); whether it *succeeds* is gated by the model's coding skill.
+Raw rows: `agent-results-granite.json`, `agent-results-ministral.json`.
+
 ## Use
 
 ```bash
