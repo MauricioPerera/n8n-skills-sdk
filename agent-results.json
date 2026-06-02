@@ -4,30 +4,12 @@
   "rows": [
     {
       "task": "schedule-slack",
-      "tool_calls": 3,
-      "errors": 0,
-      "turns": 3,
-      "validate_attempts": 1,
-      "created_ids": [
-        "hJKAEXroJK5fnS9S"
-      ],
-      "success": true,
-      "seq": [
-        "reference",
-        "validate",
-        "create"
-      ],
-      "fatal": null,
-      "wall_s": 107.7
-    },
-    {
-      "task": "webhook-http",
       "tool_calls": 2,
       "errors": 0,
       "turns": 2,
       "validate_attempts": 1,
       "created_ids": [
-        "ovI9IOpg5IrP1aXh"
+        "DKtIQleTHS1CryXT"
       ],
       "success": true,
       "seq": [
@@ -35,16 +17,16 @@
         "create"
       ],
       "fatal": null,
-      "wall_s": 89.3
+      "wall_s": 111.5
     },
     {
-      "task": "schedule-http-set",
+      "task": "webhook-http",
       "tool_calls": 3,
       "errors": 0,
       "turns": 3,
       "validate_attempts": 1,
       "created_ids": [
-        "rVDZQjsbVvyl5NuN"
+        "8xDzVx77QoSnfI4t"
       ],
       "success": true,
       "seq": [
@@ -53,7 +35,24 @@
         "create"
       ],
       "fatal": null,
-      "wall_s": 153.1
+      "wall_s": 160.4
+    },
+    {
+      "task": "schedule-http-set",
+      "tool_calls": 2,
+      "errors": 0,
+      "turns": 2,
+      "validate_attempts": 1,
+      "created_ids": [
+        "ZFvAomCahinv5z1S"
+      ],
+      "success": true,
+      "seq": [
+        "validate",
+        "create"
+      ],
+      "fatal": null,
+      "wall_s": 117.7
     }
   ]
 }

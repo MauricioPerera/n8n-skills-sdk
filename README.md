@@ -2,8 +2,9 @@
 
 **Experiment:** reproduce the n8n MCP server's "build a workflow" capability
 using only an **llms.txt-published Skill** + the **[`@n8n/workflow-sdk`](https://www.npmjs.com/package/@n8n/workflow-sdk)**
-package + the **n8n REST API** — with **no MCP** and **zero tool schemas** loaded
-into the agent's context.
+package + the **n8n REST API** — with **no MCP**, and a handful of generic CLI
+tools in context instead of the MCP's 25 (the capability knowledge lives in the
+skill prose + the SDK, not in tool schemas).
 
 Companion to the [llms.txt Skills RFC](https://github.com/MauricioPerera/llms-txt-skills)
 (`evals/poc_orchestration/`): that POC measured the 25→1 tool-in-context spectrum
@@ -72,10 +73,10 @@ Reproduced the MCP's build->validate->create path with 0 MCP tools.
 ## Benchmark: this stack vs. the MCP (agentic, same local model)
 
 `agent_harness.py` drives a local model (`qwen/qwen3.5-9b` via LM Studio) through
-a real loop, building workflows with **this stack** — the published skill + 3
-local tools (`reference`/`validate`/`create`) that shell out to the real CLI. No
-MCP. Compared against the MCP arms from the RFC POC (same model, same
-`schedule-slack` task):
+a real loop, building workflows with **this stack** — the published skill + 5
+local tools (`reference`/`search_nodes`/`node_types`/`validate`/`create`) that
+shell out to the real CLI. No MCP. Compared against the MCP arms from the RFC POC
+(same model, same `schedule-slack` task):
 
 | stack | MCP? | tools in context | avg tool calls | validation | success |
 |---|:---:|---:|---:|:---:|:---:|
@@ -83,15 +84,16 @@ MCP. Compared against the MCP arms from the RFC POC (same model, same
 | MCP, skill + segment | yes | 8 | 6 | yes | ✅ |
 | MCP, 1 passthrough (`dispatch`) | yes | 1 | 7 | yes | ✅ |
 | MCP, REST-only (`rest`) | no | 1 | 1 | **no** (skipped) | ✅ |
-| **skill + @n8n/workflow-sdk + REST** | **no** | **3** | **2.7** | **yes** | **✅ 3/3** |
+| **skill + @n8n/workflow-sdk + REST** | **no** | **5** | **2.3** | **yes** | **✅ 3/3** |
 
 This stack (N=3: `schedule-slack`, `webhook-http`, `schedule-http-set`) hit
-**100% success at avg 2.7 tool calls, 0 errors, every workflow valid on the first
-`validate`** — `reference → validate → create`. It needs **fewer round-trips than
-any MCP tool arm** because the SDK reference + skill carry the node knowledge, so
-the model writes correct code in one shot instead of discovering node types over
-`search_nodes`/`get_node_types` calls — and unlike the MCP `rest` arm, it **keeps
-local validation** (the SDK's `validateWorkflow`). 3 tool definitions, no server.
+**100% success at avg 2.3 tool calls, 0 errors, every workflow valid on the first
+`validate`** — the agent takes the minimal `validate → create` path (sometimes
+preceded by `reference`). The five tools include `search_nodes`/`node_types` (the
+`get_node_types` equivalent), but on these common nodes the agent **used neither**
+— the SDK reference + skill carry the node knowledge, so it writes correct code in
+one shot. And unlike the MCP `rest` arm, it **keeps local validation** (the SDK's
+`validateWorkflow`). Five tool definitions, no server.
 
 Run it: `N8N_API_KEY=... python agent_harness.py --model-id qwen/qwen3.5-9b`
 (raw rows in `agent-results.json`). MCP numbers are N=1 from the POC; this is N=3,
@@ -101,7 +103,7 @@ single model — a proof, not a benchmark.
 
 | model | size | result on `schedule-slack` |
 |---|---|---|
-| `qwen/qwen3.5-9b` | 9B | ✅ 3 calls (`reference → validate → create`); 3/3 tasks overall |
+| `qwen/qwen3.5-9b` | 9B | ✅ 3/3 tasks, avg 2.3 calls (`validate → create`, ± `reference`) |
 | `ibm/granite-3.2-8b` | 8B | ✅ 3 calls — confirms it's not qwen-specific |
 | `mistralai/ministral-3-3b` | 3B | ✗ looped on `reference`, never wrote code |
 
@@ -110,24 +112,27 @@ Two capable ~8–9B models complete it cleanly in ~3 calls. A 3B model hits a
 code. That floor is about the model, not the stack: the MCP path needs the same
 code-writing ability, and on a small-context model the MCP's 25 tools don't even
 fit (RFC POC, Finding 0). The skill+SDK+REST stack at least *runs* on small
-context (3 tool defs); whether it *succeeds* is gated by the model's coding skill.
+context (5 small tool defs); whether it *succeeds* is gated by the model's coding skill.
 Raw rows: `agent-results-granite.json`, `agent-results-ministral.json`.
 
 ## Use
 
 ```bash
-npm install                                  # installs @n8n/workflow-sdk
+npm install                                   # installs @n8n/workflow-sdk
 
-node src/n8n-skill.mjs reference patterns     # = get_sdk_reference
-printf '%s' "$CODE" | node src/n8n-skill.mjs validate   # = validate_workflow (local)
+node src/n8n-skill.mjs reference patterns      # = get_sdk_reference
+node src/n8n-skill.mjs search-nodes slack      # = search_nodes / get_suggested_nodes
+node src/n8n-skill.mjs node-types scheduleTrigger,slack   # = get_node_types (needs nodes.json)
+printf '%s' "$CODE" | node src/n8n-skill.mjs validate     # = validate_workflow (local)
 N8N_API_KEY=... printf '%s' "$CODE" | node src/n8n-skill.mjs create   # = create_workflow_from_code
 
-N8N_API_KEY=... node demo.mjs                 # full end-to-end proof (self-cleaning)
+N8N_API_KEY=... node demo.mjs                  # full end-to-end proof (self-cleaning)
 ```
 
 Config:
 - `N8N_API_BASE` — default `https://ardf.dev/api/v1`
-- `N8N_API_KEY` — n8n REST API key (`X-N8N-API-KEY`). **Never commit it.**
+- `N8N_API_KEY` — n8n REST API key (`X-N8N-API-KEY`), for `create`. **Never commit it.**
+- `N8N_NODES_JSON` — path to a `nodes.json` for exact `node-types` (default `nodes.json`; see above).
 
 ## How this maps to the agent flow
 
