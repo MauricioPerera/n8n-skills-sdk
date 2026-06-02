@@ -18,9 +18,18 @@ just the `@n8n/workflow-sdk` package plus one REST call:
 | n8n MCP tool | reproduced here by |
 |---|---|
 | `get_sdk_reference` | `@n8n/workflow-sdk/prompts/sdk-reference` → `n8n-skill reference` |
-| `search_nodes` / `get_suggested_nodes` | the SDK's `prompts/node-selection` + `node-recommendations` (+ the skill's node list) |
-| `validate_workflow` | `validateWorkflow()` from the SDK — **runs locally** |
-| `create_workflow_from_code` | `parseWorkflowCode()` (local) + `POST /api/v1/workflows` (REST) |
+| `search_nodes` / `get_suggested_nodes` | the SDK's `prompts/node-selection` → `n8n-skill search-nodes` |
+| `get_node_types` | `n8n-skill node-types` — exact params **when a `nodes.json` is configured**; otherwise the local `validate` loop reports parameter errors (the benchmark showed this suffices for common nodes) |
+| `validate_workflow` | `validateWorkflow()` from the SDK — **runs locally** → `n8n-skill validate` |
+| `create_workflow_from_code` | `parseWorkflowCode()` (local) + `POST /api/v1/workflows` (REST) → `n8n-skill create` |
+
+All five n8n MCP build tools now have a local/REST equivalent. The one with a
+caveat is `get_node_types`: exact per-node parameters require a `nodes.json` (the
+array n8n's editor serves at `/types/nodes.json`, or one generated from
+`n8n-nodes-base`). Set `N8N_NODES_JSON=path` (or drop `nodes.json` in the project)
+to enable it; without it, agents write from `reference` and let `validate` catch
+parameter mistakes — which the [benchmark](#benchmark-this-stack-vs-the-mcp-agentic-same-local-model)
+showed is enough for common workflows.
 
 So an agent never loads 25 tool definitions. It reads **one published skill**
 ([`skills/build-n8n-workflow/SKILL.md`](skills/build-n8n-workflow/SKILL.md)) that

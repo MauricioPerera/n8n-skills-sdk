@@ -12,13 +12,20 @@ capability is here as: **one CLI primitive** backed by `@n8n/workflow-sdk`
 (parse code → JSON, validate — locally) and the n8n REST API (create). This
 skill is the procedure; follow it in order.
 
-The CLI: `node src/n8n-skill.mjs <reference|validate|create>`.
+The CLI: `node src/n8n-skill.mjs <reference|search-nodes|node-types|validate|create>`.
+These map 1:1 onto the MCP's build tools (`get_sdk_reference`, `search_nodes`,
+`get_node_types`, `validate_workflow`, `create_workflow_from_code`).
 
 ## Recipe
 
 1. **Learn the syntax (once).** Run `node src/n8n-skill.mjs reference patterns`
    (and `reference rules` if needed). This is the SDK reference, straight from
    the package — the equivalent of the MCP's `get_sdk_reference`.
+
+   *Unfamiliar with which node to use, or its parameters?* `search-nodes <need>`
+   gives node-selection guidance; `node-types <type,type>` gives exact parameters
+   **when a `nodes.json` is configured** (see below). For the common nodes the
+   templates above + the `validate` loop are enough — don't over-fetch.
 
 2. **Write the workflow code.** Plain SDK code, **no `import` line** — the
    builder functions (`workflow`, `trigger`, `node`, `ifElse`, `switchCase`,
@@ -37,7 +44,9 @@ The CLI: `node src/n8n-skill.mjs <reference|validate|create>`.
    `printf '%s' "<code>" | node src/n8n-skill.mjs validate`
    It returns `{ valid, errors, warnings }` (this runs `validateWorkflow` from the
    SDK locally — the equivalent of the MCP's `validate_workflow`). If not valid,
-   fix the code and re-validate. Do not create invalid code.
+   fix the code and re-validate. Do not create invalid code. **This local loop is
+   how you get parameters right without a live `get_node_types`:** the validator
+   names the bad parameter; fix and re-run.
 
 4. **Create.** `printf '%s' "<code>" | node src/n8n-skill.mjs create`
    It parses, validates, and `POST`s to the n8n REST API, returning

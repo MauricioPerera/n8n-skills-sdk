@@ -58,6 +58,16 @@ TOOLS = [
             "section": {"type": "string", "enum": ["patterns", "rules", "expressions", "functions"]}},
             "required": ["section"]}}},
     {"type": "function", "function": {
+        "name": "search_nodes",
+        "description": "Find which n8n node to use for a need (SDK node-selection guidance).",
+        "parameters": {"type": "object", "properties": {
+            "query": {"type": "string"}}, "required": ["query"]}}},
+    {"type": "function", "function": {
+        "name": "node_types",
+        "description": "Get exact parameters for node types (comma-separated). Optional; if unavailable, write from reference and rely on validate.",
+        "parameters": {"type": "object", "properties": {
+            "types": {"type": "string", "description": "e.g. scheduleTrigger,slack"}}, "required": ["types"]}}},
+    {"type": "function", "function": {
         "name": "validate",
         "description": "Validate @n8n/workflow-sdk code locally. Returns {valid, errors, warnings}.",
         "parameters": {"type": "object", "properties": {
@@ -73,7 +83,9 @@ SYS = (
     "You build n8n workflows WITHOUT the n8n MCP, using three local tools backed "
     "by @n8n/workflow-sdk and the REST API. Follow the published skill.\n\n"
     "--- SKILL: build-n8n-workflow ---\n" + SKILL +
-    "\n\nCall the tools `reference`, `validate`, `create`. When done, reply with the id."
+    "\n\nTools: `reference`, `search_nodes`, `node_types` (optional helpers), then "
+    "`validate` and `create`. Minimal path is reference -> validate -> create; use "
+    "search_nodes/node_types only for unfamiliar nodes. When done, reply with the id."
 )
 
 
@@ -127,6 +139,12 @@ def run_cli(args, code=None):
 def exec_tool(name, args, metrics):
     if name == "reference":
         r = run_cli(["reference", args.get("section", "patterns")])
+        return r.stdout[:TOOL_RESULT_CAP] or "[no output]", False
+    if name == "search_nodes":
+        r = run_cli(["search-nodes", args.get("query", "")])
+        return r.stdout[:TOOL_RESULT_CAP] or "[no output]", False
+    if name == "node_types":
+        r = run_cli(["node-types", args.get("types", "")])
         return r.stdout[:TOOL_RESULT_CAP] or "[no output]", False
     if name == "validate":
         metrics["validate_attempts"] += 1

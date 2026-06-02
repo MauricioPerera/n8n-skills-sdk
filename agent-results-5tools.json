@@ -1,0 +1,24 @@
+{
+  "model": "qwen/qwen3.5-9b",
+  "stack": "skill+sdk+rest",
+  "rows": [
+    {
+      "task": "schedule-slack",
+      "tool_calls": 3,
+      "errors": 0,
+      "turns": 3,
+      "validate_attempts": 1,
+      "created_ids": [
+        "6bNVpRLohGYEok2R"
+      ],
+      "success": true,
+      "seq": [
+        "reference",
+        "validate",
+        "create"
+      ],
+      "fatal": null,
+      "wall_s": 163.2
+    }
+  ]
+}
