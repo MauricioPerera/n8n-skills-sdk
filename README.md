@@ -42,6 +42,34 @@ $ N8N_API_KEY=... node demo.mjs
 Reproduced the MCP's build->validate->create path with 0 MCP tools.
 ```
 
+## Benchmark: this stack vs. the MCP (agentic, same local model)
+
+`agent_harness.py` drives a local model (`qwen/qwen3.5-9b` via LM Studio) through
+a real loop, building workflows with **this stack** — the published skill + 3
+local tools (`reference`/`validate`/`create`) that shell out to the real CLI. No
+MCP. Compared against the MCP arms from the RFC POC (same model, same
+`schedule-slack` task):
+
+| stack | MCP? | tools in context | avg tool calls | validation | success |
+|---|:---:|---:|---:|:---:|:---:|
+| MCP, raw (`naive`/`n8n`) | yes | 25 | 6–7 | yes | (does **not fit** a 4k-context model) |
+| MCP, skill + segment | yes | 8 | 6 | yes | ✅ |
+| MCP, 1 passthrough (`dispatch`) | yes | 1 | 7 | yes | ✅ |
+| MCP, REST-only (`rest`) | no | 1 | 1 | **no** (skipped) | ✅ |
+| **skill + @n8n/workflow-sdk + REST** | **no** | **3** | **2.7** | **yes** | **✅ 3/3** |
+
+This stack (N=3: `schedule-slack`, `webhook-http`, `schedule-http-set`) hit
+**100% success at avg 2.7 tool calls, 0 errors, every workflow valid on the first
+`validate`** — `reference → validate → create`. It needs **fewer round-trips than
+any MCP tool arm** because the SDK reference + skill carry the node knowledge, so
+the model writes correct code in one shot instead of discovering node types over
+`search_nodes`/`get_node_types` calls — and unlike the MCP `rest` arm, it **keeps
+local validation** (the SDK's `validateWorkflow`). 3 tool definitions, no server.
+
+Run it: `N8N_API_KEY=... python agent_harness.py --model-id qwen/qwen3.5-9b`
+(raw rows in `agent-results.json`). MCP numbers are N=1 from the POC; this is N=3,
+single model — a proof, not a benchmark.
+
 ## Use
 
 ```bash

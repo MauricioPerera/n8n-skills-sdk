@@ -1,0 +1,59 @@
+{
+  "model": "qwen/qwen3.5-9b",
+  "stack": "skill+sdk+rest",
+  "rows": [
+    {
+      "task": "schedule-slack",
+      "tool_calls": 3,
+      "errors": 0,
+      "turns": 3,
+      "validate_attempts": 1,
+      "created_ids": [
+        "hJKAEXroJK5fnS9S"
+      ],
+      "success": true,
+      "seq": [
+        "reference",
+        "validate",
+        "create"
+      ],
+      "fatal": null,
+      "wall_s": 107.7
+    },
+    {
+      "task": "webhook-http",
+      "tool_calls": 2,
+      "errors": 0,
+      "turns": 2,
+      "validate_attempts": 1,
+      "created_ids": [
+        "ovI9IOpg5IrP1aXh"
+      ],
+      "success": true,
+      "seq": [
+        "validate",
+        "create"
+      ],
+      "fatal": null,
+      "wall_s": 89.3
+    },
+    {
+      "task": "schedule-http-set",
+      "tool_calls": 3,
+      "errors": 0,
+      "turns": 3,
+      "validate_attempts": 1,
+      "created_ids": [
+        "rVDZQjsbVvyl5NuN"
+      ],
+      "success": true,
+      "seq": [
+        "reference",
+        "validate",
+        "create"
+      ],
+      "fatal": null,
+      "wall_s": 153.1
+    }
+  ]
+}
