@@ -1,0 +1,14 @@
+node_modules/
+*.log
+
+# Secrets — NEVER commit (REST API key / tokens live outside the repo)
+.env
+.env.*
+*.token
+*.key
+.n8n_api_key
+.n8n_token
+
+# scratch
+smoke.mjs
+/tmp/

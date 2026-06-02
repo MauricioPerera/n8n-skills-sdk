@@ -1,0 +1,15 @@
+# n8n-skills-sdk
+
+> An experiment: reproduce the n8n MCP's "build a workflow" capability with an
+> llms.txt-published Skill + the `@n8n/workflow-sdk` package + the n8n REST API —
+> no MCP, no 25 tool schemas loaded into the agent's context.
+
+## Notes for agents
+
+To build an n8n workflow on this instance you do **not** need the n8n MCP. Read
+the skill below: it teaches you to write `@n8n/workflow-sdk` code and run one CLI
+(`src/n8n-skill.mjs`) that validates locally and creates via the REST API.
+
+## Skills
+
+- [build-n8n-workflow](skills/build-n8n-workflow/SKILL.md): build a workflow in this n8n instance using the @n8n/workflow-sdk (parse + validate, local) and the REST API (create) — the n8n MCP's capability with zero MCP tools in context. <!-- skill: {"version":"1.0.0","license":"MIT","sha256":"e7482671b51034eb137cc63c5a0d76873d709d0b42d7b5715fc18a278b3f9755"} -->
