@@ -12,3 +12,6 @@ node_modules/
 # scratch
 smoke.mjs
 /tmp/
+
+# Generated node descriptions (large, version-specific) — rebuild with scripts/build-nodes-json.mjs
+nodes.json
